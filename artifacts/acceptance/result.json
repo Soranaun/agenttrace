@@ -1,0 +1,18 @@
+{
+  "result": "passed",
+  "viewport_widths": [
+    1366,
+    1280,
+    1024
+  ],
+  "checks": [
+    "all scenarios and JSON downloads",
+    "legend bounds",
+    "table horizontal overflow",
+    "download-upload round trip",
+    "invalid JSON",
+    "import deduplication",
+    "offline replay",
+    "diagnosis and report download"
+  ]
+}

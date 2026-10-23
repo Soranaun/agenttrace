@@ -1,0 +1,82 @@
+{
+  "id": "demo-003",
+  "name": "模拟 · 修复后成功",
+  "status": "success",
+  "started_at": "2026-10-23T10:10:00+00:00",
+  "steps": [
+    {
+      "id": "plan",
+      "name": "理解查询任务",
+      "kind": "agent",
+      "status": "success",
+      "started_at": "2026-10-23T10:10:00+00:00",
+      "duration_ms": 180,
+      "input": {
+        "query": "查询 a-101 是否有货"
+      },
+      "output": {
+        "sku": "a-101",
+        "action": "inventory_lookup"
+      },
+      "tool": null,
+      "error": null
+    },
+    {
+      "id": "normalize",
+      "name": "规范化商品编码",
+      "kind": "transform",
+      "status": "success",
+      "started_at": "2026-10-23T10:10:00.180000+00:00",
+      "duration_ms": 12,
+      "input": {
+        "sku": "a-101"
+      },
+      "output": {
+        "sku": "A-101"
+      },
+      "tool": null,
+      "error": null
+    },
+    {
+      "id": "lookup",
+      "name": "查询库存",
+      "kind": "tool",
+      "status": "success",
+      "started_at": "2026-10-23T10:10:00.192000+00:00",
+      "duration_ms": 300,
+      "input": {
+        "sku": "A-101"
+      },
+      "output": {
+        "name": "校园纪念笔记本",
+        "stock": 24,
+        "price": 12.5
+      },
+      "tool": "inventory_lookup",
+      "error": null
+    },
+    {
+      "id": "answer",
+      "name": "生成查询结果",
+      "kind": "agent",
+      "status": "success",
+      "started_at": "2026-10-23T10:10:00.492000+00:00",
+      "duration_ms": 120,
+      "input": {
+        "name": "校园纪念笔记本",
+        "stock": 24,
+        "price": 12.5
+      },
+      "output": "校园纪念笔记本：库存 24 件，单价 12.5 元。",
+      "tool": null,
+      "error": null
+    }
+  ],
+  "simulated": true,
+  "metadata": {
+    "scenario": "校园商品库存查询",
+    "source": "本地模拟工具，无模型调用",
+    "timing_note": "模拟耗时，仅用于演示，非性能基准"
+  },
+  "schema_version": 1
+}

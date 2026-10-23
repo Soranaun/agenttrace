@@ -1,0 +1,46 @@
+{
+  "id": "demo-002",
+  "name": "模拟 · 工具调用失败",
+  "status": "failed",
+  "started_at": "2026-10-23T10:05:00+00:00",
+  "steps": [
+    {
+      "id": "plan",
+      "name": "理解查询任务",
+      "kind": "agent",
+      "status": "success",
+      "started_at": "2026-10-23T10:05:00+00:00",
+      "duration_ms": 180,
+      "input": {
+        "query": "查询 a-101 是否有货"
+      },
+      "output": {
+        "sku": "a-101",
+        "action": "inventory_lookup"
+      },
+      "tool": null,
+      "error": null
+    },
+    {
+      "id": "lookup",
+      "name": "查询库存",
+      "kind": "tool",
+      "status": "failed",
+      "started_at": "2026-10-23T10:05:00.180000+00:00",
+      "duration_ms": 450,
+      "input": {
+        "sku": "a-101"
+      },
+      "output": null,
+      "tool": "inventory_lookup",
+      "error": "KeyError: \"商品编码 'a-101' 不存在；请使用大写标准编码 A-101\""
+    }
+  ],
+  "simulated": true,
+  "metadata": {
+    "scenario": "校园商品库存查询",
+    "source": "本地模拟工具，无模型调用",
+    "timing_note": "模拟耗时，仅用于演示，非性能基准"
+  },
+  "schema_version": 1
+}

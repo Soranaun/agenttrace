@@ -1,4 +1,9 @@
 # Byte-compiled / optimized / DLL files
+# Generated submission media, local tools, renders and audit reports
+output/
+tmp/
+artifacts/delivery/
+
 __pycache__/
 *.py[codz]
 *$py.class
@@ -218,3 +223,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local competition administration and artifact-authoring tools
+docs/DELIVERY_CHECKLIST.md
+docs/RELEASE_PLAN.md
+docs/SUBMISSION_PENDING.md
+docs/VIDEO_STORYBOARD.md
+scripts/build_project_pdf.py
+scripts/build_demo_mp4.py
+scripts/capture_delivery.py
+scripts/prepare_video.py
+scripts/synthesize_narration.ps1
+scripts/package_source.py
+scripts/release_audit.py
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
