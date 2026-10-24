@@ -11,6 +11,30 @@ from agenttrace.models import Run, TraceValidationError
 from agenttrace.storage import MAX_TRACE_BYTES, load_directory
 
 ROOT = Path(__file__).resolve().parent
+MAX_SESSION_RUNS = 20
+MAX_SESSION_BYTES = 10 * 1024 * 1024
+MAX_UPLOAD_STEPS = 200
+
+
+def retain_run(key, run):
+    records = st.session_state.imported
+    if key in records:
+        return
+    if len(records) >= MAX_SESSION_RUNS:
+        raise TraceValidationError("当前会话最多保留 20 条记录，请先下载并清空会话。")
+    size = sum(len(r.to_json().encode("utf-8")) for r in records.values())
+    if size + len(run.to_json().encode("utf-8")) > MAX_SESSION_BYTES:
+        raise TraceValidationError("当前会话记录总量超过 10 MB，请先下载并清空会话。")
+    records[key] = run
+
+
+def clear_session():
+    epoch = st.session_state.get("upload_epoch", 0) + 1
+    for key in list(st.session_state):
+        del st.session_state[key]
+    st.session_state.upload_epoch = epoch
+
+
 st.set_page_config(page_title="AgentTrace · 执行追踪工作台", page_icon="🔎", layout="wide")
 st.markdown("""<style>
 .block-container {padding: 2rem 2rem 3rem; max-width: 1440px;}
@@ -29,15 +53,19 @@ if "imported" not in st.session_state:
 with st.sidebar:
     st.header("工作台")
     st.info("内置数据均为模拟数据。现场演示仅执行本地字典查询，不调用模型或外部服务。")
-    uploads = st.file_uploader("导入本地历史 JSON（单文件 ≤ 5 MB）", type=["json"], accept_multiple_files=True)
+    st.caption("上传内容会发送到应用服务器，仅供当前会话查看；请勿上传密钥、个人信息或保密记录。")
+    st.button("清空当前会话记录", on_click=clear_session)
+    uploads = st.file_uploader("导入本地历史 JSON（单文件 ≤ 5 MB）", type=["json"], accept_multiple_files=True, key=f"uploads:{st.session_state.get('upload_epoch', 0)}")
     for upload in uploads or []:
         try:
             if upload.size > MAX_TRACE_BYTES:
                 raise TraceValidationError("记录超过 5 MB 限制")
             raw = upload.getvalue()
             run = Run.from_json(raw)
+            if len(run.steps) > MAX_UPLOAD_STEPS:
+                raise TraceValidationError("公开工作台每条导入记录最多 200 个步骤")
             key = "import:" + hashlib.sha256(raw).hexdigest()
-            st.session_state.imported[key] = run
+            retain_run(key, run)
             st.success(f"已加载：{upload.name}")
         except TraceValidationError as exc:
             st.error(f"{upload.name}：{exc}")
@@ -45,8 +73,11 @@ with st.sidebar:
     fixed = st.toggle("启用编码规范化修复", value=True)
     if st.button("▶ 执行本地模拟 Agent", width="stretch"):
         live = run_local_demo(fixed)
-        st.session_state.imported["live:" + live.id] = live
-        st.success("模拟运行已记录，可在列表与对比中查看。")
+        try:
+            retain_run("live:" + live.id, live)
+            st.success("模拟运行已记录，可在列表与对比中查看。")
+        except TraceValidationError as exc:
+            st.error(str(exc))
     st.caption("导入记录仅在当前会话保存；需要留存时请下载 JSON。内置记录位于 data/runs。")
 
 builtin, errors = load_directory(ROOT / "data" / "runs")

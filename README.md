@@ -113,6 +113,30 @@ tests/                 pytest / Streamlit AppTest
 start.bat              Windows 一键启动
 ```
 
-MVP 面向单用户本地、顺序执行的 Agent。未包含在线模型接入、自动工具重试、并发追踪、鉴权和数据库。诊断为确定性记录对比，不调用大模型，不自动认定根因。上传与现场记录保存在 Streamlit 会话内，重启后需重新导入；下载 JSON 可持久保存。内置记录直接存于项目目录。不要将此本地工作台直接暴露到公网。
+MVP 面向单用户本地、顺序执行的 Agent。未包含在线模型接入、自动工具重试、并发追踪、鉴权和数据库。诊断为确定性记录对比，不调用大模型，不自动认定根因。上传与现场记录保存在 Streamlit 会话内，重启后需重新导入；下载 JSON 可持久保存。内置记录直接存于项目目录。本地启动仍绑定 127.0.0.1；公开演示请使用下述 Community Cloud 配置，不要直接转发本机端口。
 
 开源许可证：MIT，见 [LICENSE](LICENSE)。
+
+
+## 免费公开部署：Streamlit Community Cloud
+
+当前尚未创建并验收公开网址。不要把仓库地址或本地地址当作在线演示地址。
+
+1. 将已检查的部署修改提交并推送到 GitHub `Soranaun/agenttrace` 的 `main` 分支；推送前由项目所有者确认文件列表。
+2. 打开 https://share.streamlit.io/ ，登录并按页面提示连接 GitHub。点击右上角 **Create app**，选择 **Deploy a public app from GitHub / Deploy now**。
+3. Repository 选择 `Soranaun/agenttrace`，Branch 选择 `main`，Main file path 填写 `app.py`（根目录）。
+4. 在 **Advanced settings** 中选择 **Python 3.12**。不需要 Secrets、API Key、数据库或付费服务。依赖来自根目录 `requirements.txt`，主题及单文件上传上限来自 `.streamlit/config.toml`。云端不运行 `start.bat`，不上传或使用本机 `.venv`。
+5. 点击 **Deploy**，等待依赖安装和应用启动。若失败，在 **Manage app** 中查看构建日志；不要通过开放本机端口绕过失败。
+6. 确认应用为公开可见（应用设置中的 Sharing / 可见性，具体标签以平台为准），复制平台实际生成的 `streamlit.app` 地址，再用未登录的无痕窗口验证。公开应用的访客无需登录；创建者需要登录并授权 GitHub。
+7. 验收首页三条样例、关闭/开启修复各运行一次、历史回放前后步、差异诊断、JSON 下载后重新导入及诊断报告下载；另开独立浏览器会话，确认它只看到三条内置样例。只有通过后才将真实网址补入 README。
+
+### 数据与多人使用边界
+
+- `data/runs/*.json` 是所有访客共享的公开只读样例。当前仅有三组模拟库存数据；不要将私人运行保存进此目录或提交至 GitHub。`TraceRecorder.save()` 是本地接入 API，网页不调用它。
+- 上传文件发送到云端进程，但仅在当前 Streamlit 会话中解析和保存；现场模拟记录也只在当前会话中保留，不写共享目录、不调用外部工具或模型。回放只展示数据，JSON 中的工具名不会执行。
+- 当前会话最多保留 20 条上传/现场记录，序列化后总量最多 10 MiB；单文件最多 5 MiB，每条导入记录最多 200 步。可先下载，再点击“清空当前会话记录”。这些上限也适用于本地网页；本地记录器及文件格式不变。
+- 上传控件自身及 JSON 解析仍会占用额外内存，上述限制不是全站配额或抗滥用保障。免费实例共享 CPU/内存；同时打开大量会话可能变慢或触及平台资源限制。此部署用于同学演示，不提供账户体系或长期存储保证。
+- 刷新造成新会话、会话过期、重启、重新部署或休眠唤醒后，上传和现场记录可能丢失；请下载 JSON 自行留存。内置样例随仓库重新加载。会话隔离不是保密服务，请勿上传个人信息、密钥或保密数据。
+- 平台当前规则为无访问 12 小时后休眠；访客可点击 **Yes, get this app back up!** 唤醒，首次加载需等待。演示前先访问确认。
+
+官方说明：[部署步骤](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy)、[分享与可见性](https://docs.streamlit.io/deploy/streamlit-community-cloud/share-your-app)、[休眠与资源限制](https://docs.streamlit.io/deploy/streamlit-community-cloud/manage-your-app)。
